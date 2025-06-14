@@ -1,9 +1,10 @@
-import 'vant/lib/index.css'
-import './assets/main.css'
+import 'vant/lib/index.css';
+import '../src/registerServiceWorker';
+import './assets/main.css';
 
-import { Button, Cell, CellGroup, Dialog, Divider, DropdownItem, DropdownMenu, Empty, Field, Form, Icon, Loading, NavBar, Overlay, Picker, Popup, Swipe, SwipeCell, SwipeItem, Image as VanImage } from 'vant'
-import { createApp } from 'vue'
-import App from './App.vue'
+import { Button, Cell, CellGroup, Dialog, Divider, DropdownItem, DropdownMenu, Empty, Field, Form, Icon, Loading, NavBar, Overlay, Picker, Popup, Swipe, SwipeCell, SwipeItem, Image as VanImage } from 'vant';
+import { createApp } from 'vue';
+import App from './App.vue';
 
 const app = createApp(App)
 app.use(Button)
