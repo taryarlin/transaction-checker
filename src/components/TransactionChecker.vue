@@ -74,12 +74,22 @@
             <template #right>
               <van-button square type="danger" text="Delete" @click="removeTransactionById(tx.id)" style="height: 100%; min-height: 56px;" />
             </template>
-            <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
+            <van-cell :title="''" :value="formatBath(tx.amount)">
+              <template #title>
+                <span>{{ tx.name }}</span>
+                <span v-if="tx.type === 'pay'" style="background: #ef4444; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Pay</span>
+                <span v-else style="background: #22c55e; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Get</span>
+              </template>
               <template #icon>
                 <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
                   <van-icon v-if="tx.type === 'pay'" name="like" color="#ef4444" size="22" />
                   <van-icon v-else name="star" color="#22c55e" size="22" />
                 </span>
+              </template>
+              <template #extra v-if="tx.date">
+                <div style="color: #aaa; font-size: 12px; margin-top: 2px; text-align: right;">
+                  📅 {{ formatDate(tx.date) }}
+                </div>
               </template>
               <template #label v-if="tx.notes">
                 <div style="color: #888; font-size: 13px; margin-top: 2px;">📝 {{ tx.notes }}</div>
@@ -112,15 +122,23 @@ const showNamePicker = ref(false)
 
 const uniqueNames = computed(() => {
   const names = transactions.value.map(tx => tx.name).filter(Boolean)
-  // Vant Picker expects { text, value } for each option
-  return Array.from(new Set(names)).map(name => ({ text: name, value: name }))
+  // Normalize names to lowercase and trim for uniqueness, but keep original for display
+  const seen = new Map()
+  names.forEach(name => {
+    const key = name.trim().toLowerCase()
+    if (!seen.has(key)) {
+      seen.set(key, name)
+    }
+  })
+  return Array.from(seen.values()).map(name => ({ text: name, value: name.trim().toLowerCase() }))
 })
 
 const namePickerColumns = computed(() => uniqueNames.value)
 
 const filteredTransactions = computed(() => {
   if (!selectedName.value) return transactions.value
-  return transactions.value.filter(tx => tx.name === selectedName.value)
+  // Compare using normalized (lowercase, trimmed) name
+  return transactions.value.filter(tx => tx.name && tx.name.trim().toLowerCase() === selectedName.value)
 })
 
 const totalAmount = computed(() => {
@@ -174,7 +192,7 @@ function formatBath(amount) {
 }
 
 function onNameSelect({ selectedOptions, selectedValues }) {
-  // Use the value property for selection
+  // Use normalized value for selection
   selectedName.value = selectedValues[0] || ''
   showNamePicker.value = false
 }
