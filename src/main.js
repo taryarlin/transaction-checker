@@ -1,7 +1,7 @@
 import 'vant/lib/index.css'
 import './assets/main.css'
 
-import { Button, Cell, CellGroup, Dialog, DropdownItem, DropdownMenu, Empty, Field, Form, Icon, Loading, NavBar, Swipe, SwipeCell, SwipeItem } from 'vant'
+import { Button, Cell, CellGroup, Dialog, Divider, DropdownItem, DropdownMenu, Empty, Field, Form, Icon, Loading, NavBar, Picker, Popup, Swipe, SwipeCell, SwipeItem } from 'vant'
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -18,7 +18,10 @@ app.use(DropdownItem);
 app.use(Icon)
 app.use(Form);
 app.use(Cell);
+app.use(Picker);
+app.use(Popup);
 app.use(SwipeCell)
 app.use(Swipe);
 app.use(SwipeItem);
+app.use(Divider);
 app.mount('#app')

@@ -42,17 +42,43 @@
       </van-form>
       <div style="margin-top: 20px;">
         <van-divider>Transaction List</van-divider>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <van-field
+            v-model="selectedName"
+            is-link
+            readonly
+            label="Filter"
+            placeholder="Select Name"
+            @click="showNamePicker = true"
+            style="flex: 1; margin-bottom: 0;"
+          />
+          <van-popup v-model:show="showNamePicker" position="bottom">
+            <van-picker
+              :columns="namePickerColumns"
+              confirm-button-text="Select"
+              cancel-button-text="Cancel"
+              @confirm="onNameSelect"
+              @cancel="showNamePicker = false"
+            />
+          </van-popup>
+        </div>
+        <div v-if="selectedName && filteredTransactions.length"
+             style="display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #f3f6ff; border-radius: 8px; box-shadow: 0 2px 8px rgba(60,100,255,0.08); padding: 8px 14px; margin: 12px 0; font-weight: 500; color: #2a3a5a;">
+          <span style="background: #3b82f6; color: #fff; border-radius: 5px; padding: 2px 10px; font-weight: 600;">{{ selectedName }}</span>
+          <span style="margin-left: 8px; color: #3b82f6; font-weight: 600;">{{ totalAmount }} ฿</span>
+          <van-button size="mini" type="default" @click="clearSelectedName">Clear</van-button>
+        </div>
         <van-cell-group style="border-radius: 12px; overflow: hidden;">
-          <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
-          <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
+          <van-empty v-if="!loading && !filteredTransactions.length" description="No transactions yet." image-size="80" />
+          <van-swipe-cell v-for="(tx, idx) in filteredTransactions" :key="tx.id">
             <template #right>
-              <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" style="height: 100%; min-height: 56px;" />
+              <van-button square type="danger" text="Delete" @click="removeTransactionById(tx.id)" style="height: 100%; min-height: 56px;" />
             </template>
             <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
               <template #icon>
                 <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
-                  <van-icon v-if="tx.type === 'pay'" name="cross" color="#ef4444" size="22" />
-                  <van-icon v-else name="passed" color="#22c55e" size="22" />
+                  <van-icon v-if="tx.type === 'pay'" name="like" color="#ef4444" size="22" />
+                  <van-icon v-else name="star" color="#22c55e" size="22" />
                 </span>
               </template>
               <template #label v-if="tx.notes">
@@ -69,7 +95,7 @@
 
 <script setup>
 import { addDoc, collection, deleteDoc, doc, getDocs } from 'firebase/firestore'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { db } from '../firebase'
 
 const transactions = ref([])
@@ -80,6 +106,26 @@ const dropdownOptions = [
     { text: 'I have to pay', value: 'pay' },
     { text: 'I have to get', value: 'receive' }
 ]
+
+const selectedName = ref('')
+const showNamePicker = ref(false)
+
+const uniqueNames = computed(() => {
+  const names = transactions.value.map(tx => tx.name).filter(Boolean)
+  // Vant Picker expects { text, value } for each option
+  return Array.from(new Set(names)).map(name => ({ text: name, value: name }))
+})
+
+const namePickerColumns = computed(() => uniqueNames.value)
+
+const filteredTransactions = computed(() => {
+  if (!selectedName.value) return transactions.value
+  return transactions.value.filter(tx => tx.name === selectedName.value)
+})
+
+const totalAmount = computed(() => {
+  return filteredTransactions.value.reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+})
 
 const txCol = collection(db, 'transactions')
 
@@ -109,15 +155,32 @@ async function addTransaction() {
 }
 
 async function removeTransaction(idx) {
-    const tx = transactions.value[idx]
+    const tx = filteredTransactions.value[idx]
     if (tx && tx.id) {
         await deleteDoc(doc(db, 'transactions', tx.id))
         fetchTransactions()
     }
 }
 
+async function removeTransactionById(id) {
+    if (id) {
+        await deleteDoc(doc(db, 'transactions', id))
+        fetchTransactions()
+    }
+}
+
 function formatBath(amount) {
     return `${amount} ฿`
+}
+
+function onNameSelect({ selectedOptions, selectedValues }) {
+  // Use the value property for selection
+  selectedName.value = selectedValues[0] || ''
+  showNamePicker.value = false
+}
+
+function clearSelectedName() {
+  selectedName.value = ''
 }
 
 onMounted(fetchTransactions)
