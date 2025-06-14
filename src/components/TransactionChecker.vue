@@ -1,7 +1,12 @@
 <template>
     <div>
         <van-nav-bar title="💸 Pay Check" />
-        <div style="padding: 12px;">
+        <van-overlay :show="authLoading" z-index="2000">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+                <van-loading size="32" vertical color="#3b82f6">Loading...</van-loading>
+            </div>
+        </van-overlay>
+        <div style="padding: 12px;" v-show="!authLoading">
             <div v-if="user"
                 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; background: #f8fafc; border-radius: 10px; padding: 10px 18px; box-shadow: 0 2px 8px #e3e8f0;">
                 <div style="display: flex; align-items: center; gap: 14px;">
@@ -52,8 +57,30 @@
                     </van-cell-group>
 
                     <div style="margin-top: 12px;">
-                        <van-button type="primary" round block native-type="submit"
-                            :loading="loadingAdd">Add</van-button>
+                        <van-button
+                            type="primary"
+                            round
+                            block
+                            native-type="submit"
+                            :loading="loadingAdd"
+                            style="
+                                background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+                                border: none;
+                                color: #fff;
+                                font-weight: 600;
+                                font-size: 17px;
+                                box-shadow: 0 4px 16px rgba(59,130,246,0.12);
+                                letter-spacing: 0.5px;
+                                transition: background 0.2s;
+                            "
+                        >
+                            <template #default>
+                                <span style="display: flex; align-items: center; gap: 8px;">
+                                    <van-icon name="plus" size="20" color="#fff" />
+                                    Add Transaction
+                                </span>
+                            </template>
+                        </van-button>
                     </div>
                 </van-form>
 
@@ -86,15 +113,16 @@
                             <van-cell :title="''" :value="formatBath(tx.amount)">
                                 <template #title>
                                     <span>{{ tx.name }}</span>
-                                    <span v-if="tx.type === 'pay'"
-                                        style="background: #ef4444; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Pay</span>
-                                    <span v-else
-                                        style="background: #22c55e; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Get</span>
                                 </template>
                                 <template #icon>
                                     <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
                                         <van-icon v-if="tx.type === 'pay'" name="like" color="#ef4444" size="22" />
-                                        <van-icon v-else name="star" color="#22c55e" size="22" />
+                                        <van-icon v-else name="smile" color="#22c55e" size="22" />
+
+                                        <span v-if="tx.type === 'pay'"
+                                        style="background: #ef4444; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Pay</span>
+                                    <span v-else
+                                        style="background: #22c55e; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Get</span>
                                     </span>
                                 </template>
                                 <template #extra v-if="tx.date">
@@ -116,9 +144,12 @@
 </template>
 
 <script setup>
-import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore'
-import { computed, onMounted, ref } from 'vue'
-import { auth, db, onAuthStateChanged, provider, signInWithPopup, signOut } from '../firebase'
+import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import { Dialog, showConfirmDialog } from 'vant';
+import { computed, onMounted, ref } from 'vue';
+import { auth, db, onAuthStateChanged, provider, signInWithPopup, signOut } from '../firebase';
+
+const dialog = Dialog
 
 const user = ref(null)
 const transactions = ref([])
@@ -132,6 +163,7 @@ const dropdownOptions = [
 
 const selectedName = ref('')
 const showNamePicker = ref(false)
+const authLoading = ref(true)
 
 const uniqueNames = computed(() => {
     const names = transactions.value.map(tx => tx.name).filter(Boolean)
@@ -216,16 +248,9 @@ function clearSelectedName() {
     selectedName.value = ''
 }
 
-function login() {
-    signInWithPopup(auth, provider)
-}
-
-function logout() {
-    signOut(auth)
-}
-
 onAuthStateChanged(auth, (u) => {
     user.value = u
+    authLoading.value = false
     fetchTransactions()
 })
 
@@ -236,6 +261,40 @@ onMounted(() => {
 function formatDate(dateStr) {
     const d = new Date(dateStr)
     return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+async function login() {
+    authLoading.value = true
+    try {
+        await signInWithPopup(auth, provider)
+    } finally {
+        authLoading.value = false
+    }
+}
+
+async function logout() {
+    showConfirmDialog({
+        title: 'Logout',
+        message: 'Are you sure you want to logout?',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Logout',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#aaa',
+    })
+    .then(async () => {
+        authLoading.value = true
+
+        try {
+            await signOut(auth)
+        } finally {
+            authLoading.value = false
+        }
+    })
+    .catch(() => {
+        // on cancel
+    });
+
+    authLoading.value = false
 }
 </script>
 
