@@ -122,4 +122,9 @@ onMounted(fetchTransactions)
   justify-content: center;
   font-size: 16px;
 }
+
+/* Prevent mobile zoom on input focus by setting font-size >= 16px */
+:deep(.van-field__control) {
+  font-size: 16px !important;
+}
 </style>
