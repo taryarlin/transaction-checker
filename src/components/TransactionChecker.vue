@@ -3,8 +3,27 @@
     <van-nav-bar title="💸 Transaction Checker" fixed safe-area-inset-top class="vant-mobile-bar" />
     <div class="vant-mobile-content">
       <van-form @submit="addTransaction">
-        <van-field v-model="form.name" label="Name" placeholder="Who?" required clearable left-icon="user-o" />
-        <van-field v-model.number="form.amount" label="Amount" type="number" placeholder="How much?" required clearable left-icon="gold-coin-o" />
+        <van-field
+          v-model="form.name"
+          name="name"
+          label="Name"
+          placeholder="Who?"
+          :rules="[{ required: true, message: 'Name is required' }]"
+          required
+          clearable
+          left-icon="user-o"
+        />
+        <van-field
+          v-model.number="form.amount"
+          name="amount"
+          label="Amount"
+          type="number"
+          placeholder="How much?"
+          :rules="[{ required: true, message: 'Amount is required' }]"
+          required
+          clearable
+          left-icon="gold-coin-o"
+        />
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
         </van-dropdown-menu>
@@ -121,10 +140,5 @@ onMounted(fetchTransactions)
   align-items: center;
   justify-content: center;
   font-size: 16px;
-}
-
-/* Prevent mobile zoom on input focus by setting font-size >= 16px */
-:deep(.van-field__control) {
-  font-size: 16px !important;
 }
 </style>
