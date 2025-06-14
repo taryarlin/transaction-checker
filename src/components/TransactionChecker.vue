@@ -86,6 +86,16 @@
 
                 <div style="margin-top: 20px;">
                     <van-divider>Transaction List</van-divider>
+                    <div style="margin-top: 16px; margin-bottom: 8px; display: flex; gap: 12px; justify-content: center;">
+                        <div style="background: #fef2f2; color: #ef4444; border-radius: 8px; padding: 10px 18px; min-width: 120px; text-align: center; box-shadow: 0 2px 8px #fca5a5; font-weight: 600;">
+                            <div style="font-size: 15px;">Total Pay</div>
+                            <div style="font-size: 20px; margin-top: 2px;">{{ totalPay }} ฿</div>
+                        </div>
+                        <div style="background: #f0fdf4; color: #22c55e; border-radius: 8px; padding: 10px 18px; min-width: 120px; text-align: center; box-shadow: 0 2px 8px #86efac; font-weight: 600;">
+                            <div style="font-size: 15px;">Total Get</div>
+                            <div style="font-size: 20px; margin-top: 2px;">{{ totalGet }} ฿</div>
+                        </div>
+                    </div>
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                         <van-field v-model="selectedName" is-link readonly label="Filter" placeholder="Select Name"
                             @click="showNamePicker = true" style="flex: 1; margin-bottom: 0;" />
@@ -186,6 +196,18 @@ const filteredTransactions = computed(() => {
 
 const totalAmount = computed(() => {
     return filteredTransactions.value.reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+})
+
+const totalPay = computed(() => {
+    return filteredTransactions.value
+        .filter(tx => tx.type === 'pay')
+        .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
+})
+
+const totalGet = computed(() => {
+    return filteredTransactions.value
+        .filter(tx => tx.type === 'receive')
+        .reduce((sum, tx) => sum + Number(tx.amount || 0), 0)
 })
 
 const txCol = collection(db, 'transactions')
