@@ -3,32 +3,39 @@
     <van-nav-bar title="💸 Transaction Checker" fixed safe-area-inset-top class="vant-mobile-bar" />
     <div class="vant-mobile-content">
       <van-form @submit="addTransaction">
-        <van-cell-group inset>
-          <van-field v-model="form.name" label="Name" placeholder="Who?" required clearable left-icon="user-o" />
-          <van-field v-model.number="form.amount" label="Amount" type="number" placeholder="How much?" required clearable left-icon="gold-coin-o" />
-          <van-dropdown-menu>
-            <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
-          </van-dropdown-menu>
-          <div class="vant-mobile-btn-wrap">
-            <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
-          </div>
-        </van-cell-group>
+        <van-field v-model="form.name" label="Name" placeholder="Who?" required clearable left-icon="user-o" />
+        <van-field v-model.number="form.amount" label="Amount" type="number" placeholder="How much?" required clearable left-icon="gold-coin-o" />
+        <van-dropdown-menu>
+          <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
+        </van-dropdown-menu>
+        <div class="vant-mobile-btn-wrap">
+          <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
+        </div>
       </van-form>
       <div class="vant-mobile-list-wrap">
-        <van-cell-group title="Transactions">
+        <div class="vant-mobile-list">
           <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
+          <!-- TEST SWIPE CELL: Remove after debugging -->
+          <van-swipe-cell>
+            <template #right>
+              <van-button square type="danger" text="Delete" />
+            </template>
+            <div style="padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 8px;">Test swipe me!</div>
+          </van-swipe-cell>
+          <!-- END TEST SWIPE CELL -->
           <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
-            <template #left>
+            <template #right>
               <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" />
             </template>
-            <van-cell :title="tx.name" :value="tx.amount + ' ฿'" :label="typeLabel(tx.type)" class="vant-mobile-list-item">
+            <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)" class="vant-mobile-list-item">
               <template #icon>
-                <van-icon :name="tx.type === 'pay' ? 'down' : 'up'" :color="tx.type === 'pay' ? '#ef4444' : '#22c55e'" size="22" />
+                <van-icon v-if="tx.type === 'pay'" name="balance-pay" color="#ef4444" size="22" />
+                <van-icon v-else name="cash-back-record" color="#22c55e" size="22" />
               </template>
             </van-cell>
           </van-swipe-cell>
           <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
-        </van-cell-group>
+        </div>
       </div>
     </div>
   </div>
@@ -83,6 +90,10 @@ async function removeTransaction(idx) {
   }
 }
 
+function formatBath(amount) {
+  return `${amount} ฿`
+}
+
 onMounted(fetchTransactions)
 </script>
 
@@ -106,6 +117,7 @@ onMounted(fetchTransactions)
 }
 .vant-mobile-list-wrap {
   margin-top: 32px;
+  /* Remove overflow hidden if present */
 }
 .vant-mobile-list-item {
   font-size: 18px;

@@ -5,7 +5,6 @@ import { Button, Cell, CellGroup, Dialog, DropdownItem, DropdownMenu, Empty, Fie
 import { createApp } from 'vue'
 import App from './App.vue'
 
-
 const app = createApp(App)
 app.use(Button)
 app.use(Field)
