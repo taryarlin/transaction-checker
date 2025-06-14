@@ -120,6 +120,9 @@
                         <van-button type="success" size="small" icon="photo" @click="downloadTableAsImage" style="border-radius: 6px;">
                             Download as Image
                         </van-button>
+                        <van-button type="info" size="small" icon="share-o" @click="shareTransactions" style="border-radius: 6px;">
+                            Share
+                        </van-button>
                     </div>
                     <div class="transaction-table-image-target">
                         <van-cell-group style="border-radius: 12px; overflow: hidden;">
@@ -390,6 +393,43 @@ function downloadTableAsImage() {
             ? `transactions_${selectedName.value}.png`
             : 'transactions_all.png';
         link.click();
+    });
+}
+
+function shareTransactions() {
+    const title = selectedName.value
+        ? `Transactions for: ${selectedName.value}`
+        : 'All Transactions';
+    const rows = filteredTransactions.value.map(tx =>
+        `${tx.name || ''} | ${tx.type === 'pay' ? 'Pay' : 'Get'} | ${tx.amount || ''} ฿ | ${tx.date ? formatDate(tx.date) : ''} | ${tx.notes || ''}`
+    ).join('\n');
+    const shareText = `${title}\n\n${rows}`;
+
+    // Messenger share URL
+    const messengerUrl = `fb-messenger://share?link=${encodeURIComponent(window.location.href)}&app_id=YOUR_FB_APP_ID`;
+    // Viber share URL
+    const viberUrl = `viber://forward?text=${encodeURIComponent(shareText)}`;
+    // LINE share URL
+    const lineUrl = `https://social-plugins.line.me/lineit/share?text=${encodeURIComponent(shareText)}`;
+
+    // Show options to user
+    showConfirmDialog({
+        title: 'Share Transactions',
+        message: 'Choose an app to share:',
+        showCancelButton: true,
+        confirmButtonText: 'LINE',
+        cancelButtonText: 'Viber',
+    })
+    .then(action => {
+        if (action === 'confirm') {
+            window.open(lineUrl, '_blank');
+        } else if (action === 'cancel') {
+            window.open(messengerUrl, '_blank');
+        }
+    })
+    .catch(() => {
+        // If user closes dialog, fallback to Viber
+        window.open(viberUrl, '_blank');
     });
 }
 </script>
