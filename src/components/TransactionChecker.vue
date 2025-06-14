@@ -1,7 +1,7 @@
 <template>
   <div>
     <van-nav-bar title="💸 Transaction Checker" />
-    <div style="margin-top: 20px;">
+    <div>
       <van-form @submit="addTransaction">
         <van-field
           v-model="form.name"
@@ -9,6 +9,7 @@
           label="Name"
           placeholder="Who?"
           :rules="[{ required: true, message: 'Name is required' }]"
+          required
           clearable
         />
         <van-field
@@ -18,17 +19,18 @@
           type="number"
           placeholder="How much?"
           :rules="[{ required: true, message: 'Amount is required' }]"
+          required
           clearable
         />
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
         </van-dropdown-menu>
-
         <div>
           <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
         </div>
       </van-form>
-      <div>
+      <div style="margin-top: 20px; margin-bottom: 20px;">
+        <van-divider>Transaction List</van-divider>
         <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
         <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
           <template #right>
@@ -36,8 +38,8 @@
           </template>
           <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
             <template #icon>
-              <van-icon v-if="tx.type === 'pay'" name="balance-pay" color="#ef4444" size="22" />
-              <van-icon v-else name="cash-back-record" color="#22c55e" size="22" />
+              <van-icon v-if="tx.type === 'pay'" name="cross" color="#ef4444" size="22" />
+              <van-icon v-else name="passed" color="#22c55e" size="22" />
             </template>
           </van-cell>
         </van-swipe-cell>
@@ -102,3 +104,5 @@ function formatBath(amount) {
 
 onMounted(fetchTransactions)
 </script>
+
+<!-- No custom CSS -->

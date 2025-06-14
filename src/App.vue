@@ -14,7 +14,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <div style="max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff;">
+  <!-- <div style="max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff;">
     <van-form @submit="onSubmit">
       <van-field
         v-model="username"
@@ -37,7 +37,9 @@ function onSubmit() {
         </van-button>
       </div>
     </van-form>
-  </div>
+  </div> -->
+
+  <TransactionChecker />
 </template>
 
 <!-- No custom CSS -->
