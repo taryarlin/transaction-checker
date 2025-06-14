@@ -1,5 +1,5 @@
 import 'vant/lib/index.css'
-// import './assets/main.css'
+import './assets/main.css'
 
 import { Button, Cell, CellGroup, Dialog, DropdownItem, DropdownMenu, Empty, Field, Form, Icon, Loading, NavBar, Swipe, SwipeCell, SwipeItem } from 'vant'
 import { createApp } from 'vue'
