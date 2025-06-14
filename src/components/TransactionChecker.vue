@@ -331,10 +331,11 @@ async function logout() {
 
 function exportPDF() {
     const doc = new jsPDF();
+    // doc.setFont('NotoSansMyanmar', 'normal');
+    doc.setFontSize(18);
     const title = selectedName.value
         ? `Transactions for: ${selectedName.value}`
         : 'All Transactions';
-    doc.setFontSize(18);
     doc.text(title, 14, 18);
     doc.setFontSize(12);
     const columns = [
@@ -355,6 +356,7 @@ function exportPDF() {
         startY: 26,
         head: [columns.map(col => col.header)],
         body: rows.map(row => columns.map(col => row[col.dataKey])),
+        // styles: { font: 'NotoSansMyanmar', fontStyle: 'normal', fontSize: 10, cellWidth: 'wrap' },
         styles: { fontSize: 10, cellWidth: 'wrap' },
         headStyles: { fillColor: [59, 130, 246] },
         margin: { left: 10, right: 10 },
