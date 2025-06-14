@@ -112,46 +112,51 @@
                         <span style="margin-left: 8px; color: #3b82f6; font-weight: 600;">{{ totalAmount }} ฿</span>
                         <van-button size="mini" type="default" @click="clearSelectedName">Clear</van-button>
                     </div>
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 8px;">
                         <van-button type="primary" size="small" icon="description" @click="exportPDF" style="border-radius: 6px;">
                             Export PDF
                         </van-button>
+                        <van-button type="success" size="small" icon="photo" @click="downloadTableAsImage" style="border-radius: 6px;">
+                            Download as Image
+                        </van-button>
                     </div>
-                    <van-cell-group style="border-radius: 12px; overflow: hidden;">
-                        <van-empty v-if="!loading && !filteredTransactions.length" description="No transactions yet."
-                            image-size="80" />
-                        <van-swipe-cell v-for="(tx, idx) in filteredTransactions" :key="tx.id">
-                            <template #right>
-                                <van-button square type="danger" text="Delete" @click="removeTransactionById(tx.id)"
-                                    style="height: 100%; min-height: 56px;" />
-                            </template>
-                            <van-cell :title="''" :value="formatBath(tx.amount)">
-                                <template #title>
-                                    <span>{{ tx.name }}</span>
+                    <div class="transaction-table-image-target">
+                        <van-cell-group style="border-radius: 12px; overflow: hidden;">
+                            <van-empty v-if="!loading && !filteredTransactions.length" description="No transactions yet."
+                                image-size="80" />
+                            <van-swipe-cell v-for="(tx, idx) in filteredTransactions" :key="tx.id">
+                                <template #right>
+                                    <van-button square type="danger" text="Delete" @click="removeTransactionById(tx.id)"
+                                        style="height: 100%; min-height: 56px;" />
                                 </template>
-                                <template #icon>
-                                    <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
-                                        <van-icon v-if="tx.type === 'pay'" name="like" color="#ef4444" size="22" />
-                                        <van-icon v-else name="smile" color="#22c55e" size="22" />
+                                <van-cell :title="''" :value="formatBath(tx.amount)">
+                                    <template #title>
+                                        <span>{{ tx.name }}</span>
+                                    </template>
+                                    <template #icon>
+                                        <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
+                                            <van-icon v-if="tx.type === 'pay'" name="like" color="#ef4444" size="22" />
+                                            <van-icon v-else name="smile" color="#22c55e" size="22" />
 
-                                        <span v-if="tx.type === 'pay'"
-                                        style="background: #ef4444; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Pay</span>
-                                    <span v-else
-                                        style="background: #22c55e; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Get</span>
-                                    </span>
-                                </template>
-                                <template #extra v-if="tx.date">
-                                    <div style="color: #aaa; font-size: 12px; margin-top: 2px; text-align: right;">
-                                        📅 {{ formatDate(tx.date) }}
-                                    </div>
-                                </template>
-                                <template #label v-if="tx.notes">
-                                    <div style="color: #888; font-size: 13px; margin-top: 2px;">📝 {{ tx.notes }}</div>
-                                </template>
-                            </van-cell>
-                        </van-swipe-cell>
-                        <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
-                    </van-cell-group>
+                                            <span v-if="tx.type === 'pay'"
+                                            style="background: #ef4444; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Pay</span>
+                                        <span v-else
+                                            style="background: #22c55e; color: #fff; border-radius: 5px; padding: 2px 8px; font-size: 13px; margin-left: 8px; font-weight: 600;">Get</span>
+                                        </span>
+                                    </template>
+                                    <template #extra v-if="tx.date">
+                                        <div style="color: #aaa; font-size: 12px; margin-top: 2px; text-align: right;">
+                                            📅 {{ formatDate(tx.date) }}
+                                        </div>
+                                    </template>
+                                    <template #label v-if="tx.notes">
+                                        <div style="color: #888; font-size: 13px; margin-top: 2px;">📝 {{ tx.notes }}</div>
+                                    </template>
+                                </van-cell>
+                            </van-swipe-cell>
+                            <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
+                        </van-cell-group>
+                    </div>
                 </div>
             </template>
         </div>
@@ -160,6 +165,7 @@
 
 <script setup>
 import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Dialog, showConfirmDialog, Toast } from 'vant';
@@ -367,6 +373,23 @@ function exportPDF() {
             ? `transactions_${selectedName.value}.pdf`
             : 'transactions_all.pdf'
     );
+}
+
+function downloadTableAsImage() {
+    // Find the transaction list DOM element
+    const tableElement = document.querySelector('.transaction-table-image-target');
+    if (!tableElement) {
+        Toast.fail('Transaction table not found!');
+        return;
+    }
+    html2canvas(tableElement).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = selectedName.value
+            ? `transactions_${selectedName.value}.png`
+            : 'transactions_all.png';
+        link.click();
+    });
 }
 </script>
 
