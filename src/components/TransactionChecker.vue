@@ -147,7 +147,7 @@
 import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import { Dialog, showConfirmDialog } from 'vant';
 import { computed, onMounted, ref } from 'vue';
-import { auth, db, onAuthStateChanged, provider, signInWithPopup, signOut } from '../firebase';
+import { auth, db, onAuthStateChanged, provider, signInWithRedirect, signOut } from '../firebase';
 
 const dialog = Dialog
 
@@ -266,7 +266,7 @@ function formatDate(dateStr) {
 async function login() {
     authLoading.value = true
     try {
-        await signInWithPopup(auth, provider)
+        await signInWithRedirect(auth, provider)
     } finally {
         authLoading.value = false
     }
