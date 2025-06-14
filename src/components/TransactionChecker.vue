@@ -15,17 +15,9 @@
       <div class="vant-mobile-list-wrap">
         <div class="vant-mobile-list">
           <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
-          <!-- TEST SWIPE CELL: Remove after debugging -->
-          <van-swipe-cell>
-            <template #right>
-              <van-button square type="danger" text="Delete" />
-            </template>
-            <div style="padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 8px;">Test swipe me!</div>
-          </van-swipe-cell>
-          <!-- END TEST SWIPE CELL -->
           <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
             <template #right>
-              <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" />
+              <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" class="delete-btn-full" />
             </template>
             <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)" class="vant-mobile-list-item">
               <template #icon>
@@ -117,9 +109,17 @@ onMounted(fetchTransactions)
 }
 .vant-mobile-list-wrap {
   margin-top: 32px;
-  /* Remove overflow hidden if present */
 }
 .vant-mobile-list-item {
   font-size: 18px;
+}
+.delete-btn-full {
+  height: 100%;
+  min-height: 56px;
+  /* Ensures the button fills the swipe cell vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }
 </style>
