@@ -9,7 +9,6 @@
           label="Name"
           placeholder="Who?"
           :rules="[{ required: true, message: 'Name is required' }]"
-          required
           clearable
         />
         <van-field
@@ -19,12 +18,12 @@
           type="number"
           placeholder="How much?"
           :rules="[{ required: true, message: 'Amount is required' }]"
-          required
           clearable
         />
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
         </van-dropdown-menu>
+
         <div>
           <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
         </div>
