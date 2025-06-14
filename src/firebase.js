@@ -1,7 +1,7 @@
 // Firebase configuration and initialization
 // Replace the config object below with your own Firebase project config
 import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
+import { getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -18,4 +18,4 @@ const db = getFirestore(app)
 const auth = getAuth(app)
 const provider = new GoogleAuthProvider()
 
-export { auth, db, onAuthStateChanged, provider, signInWithPopup, signInWithRedirect, signOut }
+export { auth, db, getRedirectResult, onAuthStateChanged, provider, signInWithPopup, signInWithRedirect, signOut }

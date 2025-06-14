@@ -26,7 +26,7 @@
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
                     <img src="https://cdn-icons-png.flaticon.com/512/3584/3584670.png" width="150" height="150"
                         style="margin-bottom: 18px; filter: drop-shadow(0 2px 8px #cfd8dc);" alt="Google" />
-                    <div style="font-size: 22px; font-weight: 700; color: #222; margin-bottom: 8px;">Welcome to PayCheck
+                    <div style="font-size: 22px; font-weight: 700, color: #222; margin-bottom: 8px;">Welcome to PayCheck
                     </div>
                     <div
                         style="font-size: 15px; color: #666; margin-bottom: 24px; text-align: center; max-width: 320px;">
@@ -145,9 +145,9 @@
 
 <script setup>
 import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
-import { Dialog, showConfirmDialog } from 'vant';
+import { Dialog, showConfirmDialog, Toast } from 'vant';
 import { computed, onMounted, ref } from 'vue';
-import { auth, db, onAuthStateChanged, provider, signInWithRedirect, signOut } from '../firebase';
+import { auth, db, onAuthStateChanged, provider, signInWithPopup, signOut } from '../firebase';
 
 const dialog = Dialog
 
@@ -248,13 +248,13 @@ function clearSelectedName() {
     selectedName.value = ''
 }
 
+onMounted(() => {
+  authLoading.value = false
+})
+
 onAuthStateChanged(auth, (u) => {
     user.value = u
     authLoading.value = false
-    fetchTransactions()
-})
-
-onMounted(() => {
     fetchTransactions()
 })
 
@@ -266,7 +266,10 @@ function formatDate(dateStr) {
 async function login() {
     authLoading.value = true
     try {
-        await signInWithRedirect(auth, provider)
+        await signInWithPopup(auth, provider)
+    } catch (e) {
+        Toast.fail({ message: 'Google login failed', duration: 3500 })
+        console.error('Google login popup error:', e)
     } finally {
         authLoading.value = false
     }
