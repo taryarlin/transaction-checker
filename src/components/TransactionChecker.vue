@@ -112,6 +112,11 @@
                         <span style="margin-left: 8px; color: #3b82f6; font-weight: 600;">{{ totalAmount }} ฿</span>
                         <van-button size="mini" type="default" @click="clearSelectedName">Clear</van-button>
                     </div>
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                        <van-button type="primary" size="small" icon="description" @click="exportPDF" style="border-radius: 6px;">
+                            Export PDF
+                        </van-button>
+                    </div>
                     <van-cell-group style="border-radius: 12px; overflow: hidden;">
                         <van-empty v-if="!loading && !filteredTransactions.length" description="No transactions yet."
                             image-size="80" />
@@ -155,6 +160,8 @@
 
 <script setup>
 import { addDoc, collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Dialog, showConfirmDialog, Toast } from 'vant';
 import { computed, onMounted, ref } from 'vue';
 import { auth, db, onAuthStateChanged, provider, signInWithPopup, signOut } from '../firebase';
@@ -320,6 +327,44 @@ async function logout() {
     });
 
     authLoading.value = false
+}
+
+function exportPDF() {
+    const doc = new jsPDF();
+    const title = selectedName.value
+        ? `Transactions for: ${selectedName.value}`
+        : 'All Transactions';
+    doc.setFontSize(18);
+    doc.text(title, 14, 18);
+    doc.setFontSize(12);
+    const columns = [
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Type', dataKey: 'type' },
+        { header: 'Amount', dataKey: 'amount' },
+        { header: 'Date', dataKey: 'date' },
+        { header: 'Notes', dataKey: 'notes' },
+    ];
+    const rows = filteredTransactions.value.map(tx => ({
+        name: tx.name || '',
+        type: tx.type === 'pay' ? 'Pay' : 'Get',
+        amount: tx.amount || '',
+        date: tx.date ? formatDate(tx.date) : '',
+        notes: tx.notes || '',
+    }));
+    autoTable(doc, {
+        startY: 26,
+        head: [columns.map(col => col.header)],
+        body: rows.map(row => columns.map(col => row[col.dataKey])),
+        styles: { fontSize: 10, cellWidth: 'wrap' },
+        headStyles: { fillColor: [59, 130, 246] },
+        margin: { left: 10, right: 10 },
+        theme: 'grid',
+    });
+    doc.save(
+        selectedName.value
+            ? `transactions_${selectedName.value}.pdf`
+            : 'transactions_all.pdf'
+    );
 }
 </script>
 
