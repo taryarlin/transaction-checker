@@ -1,7 +1,7 @@
 <template>
-  <div class="vant-mobile-bg">
-    <van-nav-bar title="💸 Transaction Checker" fixed safe-area-inset-top class="vant-mobile-bar" />
-    <div class="vant-mobile-content">
+  <div>
+    <van-nav-bar title="💸 Transaction Checker" />
+    <div style="margin-top: 20px;">
       <van-form @submit="addTransaction">
         <van-field
           v-model="form.name"
@@ -11,7 +11,6 @@
           :rules="[{ required: true, message: 'Name is required' }]"
           required
           clearable
-          left-icon="user-o"
         />
         <van-field
           v-model.number="form.amount"
@@ -22,31 +21,28 @@
           :rules="[{ required: true, message: 'Amount is required' }]"
           required
           clearable
-          left-icon="gold-coin-o"
         />
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
         </van-dropdown-menu>
-        <div class="vant-mobile-btn-wrap">
+        <div>
           <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
         </div>
       </van-form>
-      <div class="vant-mobile-list-wrap">
-        <div class="vant-mobile-list">
-          <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
-          <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
-            <template #right>
-              <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" class="delete-btn-full" />
+      <div>
+        <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
+        <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
+          <template #right>
+            <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" style="height: 100%; min-height: 56px;" />
+          </template>
+          <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
+            <template #icon>
+              <van-icon v-if="tx.type === 'pay'" name="balance-pay" color="#ef4444" size="22" />
+              <van-icon v-else name="cash-back-record" color="#22c55e" size="22" />
             </template>
-            <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)" class="vant-mobile-list-item">
-              <template #icon>
-                <van-icon v-if="tx.type === 'pay'" name="balance-pay" color="#ef4444" size="22" />
-                <van-icon v-else name="cash-back-record" color="#22c55e" size="22" />
-              </template>
-            </van-cell>
-          </van-swipe-cell>
-          <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
-        </div>
+          </van-cell>
+        </van-swipe-cell>
+        <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
       </div>
     </div>
   </div>
@@ -62,83 +58,48 @@ const form = ref({ name: '', amount: '', type: 'pay' })
 const loading = ref(true)
 const loadingAdd = ref(false)
 const dropdownOptions = [
-  { text: 'I have to pay', value: 'pay' },
-  { text: 'I have to get', value: 'receive' }
+    { text: 'I have to pay', value: 'pay' },
+    { text: 'I have to get', value: 'receive' }
 ]
 
 const txCol = collection(db, 'transactions')
 
 function typeLabel(type) {
-  return type === 'pay' ? 'I have to pay' : 'I have to get'
+    return type === 'pay' ? 'I have to pay' : 'I have to get'
 }
 
 async function fetchTransactions() {
-  loading.value = true
-  try {
-    const snapshot = await getDocs(txCol)
-    transactions.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  } catch (e) {
-    console.error('Firestore fetch error:', e)
-    transactions.value = []
-  }
-  loading.value = false
+    loading.value = true
+    try {
+        const snapshot = await getDocs(txCol)
+        transactions.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (e) {
+        console.error('Firestore fetch error:', e)
+        transactions.value = []
+    }
+    loading.value = false
 }
 
 async function addTransaction() {
-  if (!form.value.name || !form.value.amount) return
-  loadingAdd.value = true
-  await addDoc(txCol, { ...form.value })
-  form.value = { name: '', amount: '', type: 'pay' }
-  loadingAdd.value = false
-  fetchTransactions()
+    if (!form.value.name || !form.value.amount) return
+    loadingAdd.value = true
+    await addDoc(txCol, { ...form.value })
+    form.value = { name: '', amount: '', type: 'pay' }
+    loadingAdd.value = false
+    fetchTransactions()
 }
 
 async function removeTransaction(idx) {
-  const tx = transactions.value[idx]
-  if (tx && tx.id) {
-    await deleteDoc(doc(db, 'transactions', tx.id))
-    fetchTransactions()
-  }
+    const tx = transactions.value[idx]
+    if (tx && tx.id) {
+        await deleteDoc(doc(db, 'transactions', tx.id))
+        fetchTransactions()
+    }
 }
 
 function formatBath(amount) {
-  return `${amount} ฿`
+    return `${amount} ฿`
 }
 
 onMounted(fetchTransactions)
 </script>
-
-<style scoped>
-.vant-mobile-bg {
-  min-height: 100vh;
-  background: #f6f7fb;
-  padding: 0;
-}
-.vant-mobile-bar {
-  background: #6366f1;
-  color: #fff;
-}
-.vant-mobile-content {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 80px 0 32px 0;
-}
-.vant-mobile-btn-wrap {
-  margin-top: 18px;
-}
-.vant-mobile-list-wrap {
-  margin-top: 32px;
-}
-.vant-mobile-list-item {
-  font-size: 18px;
-}
-.delete-btn-full {
-  height: 100%;
-  min-height: 56px;
-  /* Ensures the button fills the swipe cell vertically */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-</style>
