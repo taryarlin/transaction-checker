@@ -110,7 +110,8 @@
                             style="background: #3b82f6; color: #fff; border-radius: 5px; padding: 2px 10px; font-weight: 600;">{{
                             selectedName }}</span>
                         <span style="margin-left: 8px; color: #3b82f6; font-weight: 600;">{{ totalAmount }} ฿</span>
-                        <van-button size="mini" type="default" @click="clearSelectedName">Clear</van-button>
+                        <van-button size="mini" type="danger" plain icon="close" @click="clearSelectedName" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        </van-button>
                     </div>
                     <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 8px;">
                         <van-button type="primary" size="small" icon="description" @click="exportPDF" style="border-radius: 6px;">
