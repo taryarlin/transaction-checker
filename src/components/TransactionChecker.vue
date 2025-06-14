@@ -1,49 +1,55 @@
 <template>
   <div>
     <van-nav-bar title="💸 Transaction Checker" />
-    <div>
+    <div style="padding: 12px;">
       <van-form @submit="addTransaction">
-        <van-field
-          v-model="form.name"
-          name="name"
-          label="Name"
-          placeholder="Who?"
-          :rules="[{ required: true, message: 'Name is required' }]"
-          required
-          clearable
-        />
-        <van-field
-          v-model.number="form.amount"
-          name="amount"
-          label="Amount"
-          type="number"
-          placeholder="How much?"
-          :rules="[{ required: true, message: 'Amount is required' }]"
-          required
-          clearable
-        />
+        <van-cell-group style="border-radius: 12px; overflow: hidden;">
+          <van-field
+            v-model="form.name"
+            name="name"
+            label="Name"
+            placeholder="Who?"
+            :rules="[{ required: true, message: 'Name is required' }]"
+            required
+            clearable
+          />
+          <van-field
+            v-model.number="form.amount"
+            name="amount"
+            label="Amount"
+            type="number"
+            placeholder="How much?"
+            :rules="[{ required: true, message: 'Amount is required' }]"
+            required
+            clearable
+          />
+        </van-cell-group>
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
         </van-dropdown-menu>
-        <div>
-          <van-button type="primary" block native-type="submit" :loading="loadingAdd">Add</van-button>
+        <div style="margin-top: 12px;">
+          <van-button type="primary" round block native-type="submit" :loading="loadingAdd">Add</van-button>
         </div>
       </van-form>
-      <div style="margin-top: 20px; margin-bottom: 20px;">
+      <div style="margin-top: 20px;">
         <van-divider>Transaction List</van-divider>
-        <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
-        <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
-          <template #right>
-            <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" style="height: 100%; min-height: 56px;" />
-          </template>
-          <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
-            <template #icon>
-              <van-icon v-if="tx.type === 'pay'" name="cross" color="#ef4444" size="22" />
-              <van-icon v-else name="passed" color="#22c55e" size="22" />
+        <van-cell-group style="border-radius: 12px; overflow: hidden;">
+          <van-empty v-if="!loading && !transactions.length" description="No transactions yet." image-size="80" />
+          <van-swipe-cell v-for="(tx, idx) in transactions" :key="tx.id">
+            <template #right>
+              <van-button square type="danger" text="Delete" @click="removeTransaction(idx)" style="height: 100%; min-height: 56px;" />
             </template>
-          </van-cell>
-        </van-swipe-cell>
-        <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
+            <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
+              <template #icon>
+                <span style="display: flex; align-items: center; gap: 10px;">
+                  <van-icon v-if="tx.type === 'pay'" name="cross" color="#ef4444" size="22" />
+                  <van-icon v-else name="passed" color="#22c55e" size="22" />
+                </span>
+              </template>
+            </van-cell>
+          </van-swipe-cell>
+          <van-loading v-if="loading" size="24" vertical>Loading...</van-loading>
+        </van-cell-group>
       </div>
     </div>
   </div>
