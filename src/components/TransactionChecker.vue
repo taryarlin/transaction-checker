@@ -23,6 +23,15 @@
             required
             clearable
           />
+          <van-field
+            v-model="form.notes"
+            name="notes"
+            label="Notes"
+            placeholder="Optional notes"
+            clearable
+            autosize
+            type="textarea"
+          />
         </van-cell-group>
         <van-dropdown-menu>
           <van-dropdown-item v-model="form.type" :options="dropdownOptions" />
@@ -41,10 +50,13 @@
             </template>
             <van-cell :title="tx.name" :value="formatBath(tx.amount)" :label="typeLabel(tx.type)">
               <template #icon>
-                <span style="display: flex; align-items: center; gap: 10px;">
+                <span style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
                   <van-icon v-if="tx.type === 'pay'" name="cross" color="#ef4444" size="22" />
                   <van-icon v-else name="passed" color="#22c55e" size="22" />
                 </span>
+              </template>
+              <template #label v-if="tx.notes">
+                <div style="color: #888; font-size: 13px; margin-top: 2px;">📝 {{ tx.notes }}</div>
               </template>
             </van-cell>
           </van-swipe-cell>
@@ -56,12 +68,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { addDoc, collection, deleteDoc, doc, getDocs } from 'firebase/firestore'
+import { onMounted, ref } from 'vue'
 import { db } from '../firebase'
-import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'
 
 const transactions = ref([])
-const form = ref({ name: '', amount: '', type: 'pay' })
+const form = ref({ name: '', amount: '', type: 'pay', notes: '' })
 const loading = ref(true)
 const loadingAdd = ref(false)
 const dropdownOptions = [
@@ -91,7 +103,7 @@ async function addTransaction() {
     if (!form.value.name || !form.value.amount) return
     loadingAdd.value = true
     await addDoc(txCol, { ...form.value })
-    form.value = { name: '', amount: '', type: 'pay' }
+    form.value = { name: '', amount: '', type: 'pay', notes: '' }
     loadingAdd.value = false
     fetchTransactions()
 }
